@@ -22,7 +22,7 @@ def run_game():
     while True:
         # Caption keyboard and mouse events
         game_functions.check_events(ship)
-        ship.update()
+        ship.update_position()
         # Screen redraws each time through the loop
         game_functions.update_screen(ai_settings, screen, ship)
 
