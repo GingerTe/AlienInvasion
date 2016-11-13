@@ -1,6 +1,7 @@
 import pygame
 
 import game_functions
+from game_stats import GameStats
 from settings import Settings
 from ship import Ship
 
@@ -11,9 +12,12 @@ def run_game():
 
     pygame.init()
     # Set screen size and caption
-    screen = pygame.display.set_mode(
-        (ai_settings.screen_width, ai_settings.screen_height))
+    screen = pygame.display.set_mode((ai_settings.screen_width,
+                                      ai_settings.screen_height))
     pygame.display.set_caption(ai_settings.screen_caption)
+
+    # Create instance for storing game stats
+    stats = GameStats(ai_settings)
 
     # Create a ship
     ship = Ship(ai_settings, screen)
@@ -29,9 +33,10 @@ def run_game():
     while True:
         # Caption keyboard and mouse events
         game_functions.check_events(ai_settings, screen, ship, bullet_group)
-        ship.update()
-        game_functions.update_bullet_group(bullet_group)
-        game_functions.update_alien_group(ai_settings, alien_group)
+        if stats.game_active:
+            ship.update()
+            game_functions.update_bullet_group(ai_settings, screen, ship, alien_group, bullet_group)
+            game_functions.update_alien_group(ai_settings, stats, screen, ship, alien_group, bullet_group)
         # Screen redraws each time through the loop
         game_functions.update_screen(ai_settings, screen, ship, alien_group, bullet_group)
 

@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 
 import pygame
 
@@ -79,10 +80,43 @@ def change_fleet_direction(ai_settings, alien_group):
     ai_settings.fleet_direction *= -1
 
 
-def update_alien_group(ai_settings, alien_group):
+def check_alien_bottom(ai_settings, stats, screen, ship, alien_group, bullet_group):
+    """Check if aliens reaches bottom side of the screen"""
+    screen_rect = screen.get_rect()
+    for alien in alien_group.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+            # Same as ship collision
+            ship_hit(ai_settings, stats, screen, ship, alien_group, bullet_group)
+
+
+def update_alien_group(ai_settings, stats, screen, ship, alien_group, bullet_group):
     """Update all alien position in the fleet"""
     check_fleet_edge(ai_settings, alien_group)
     alien_group.update()
+
+    # Checking collisions "alien-ship"
+    if pygame.sprite.spritecollideany(ship, alien_group):
+        ship_hit(ai_settings, stats, screen, ship, alien_group, bullet_group)
+
+    check_alien_bottom(ai_settings, stats, screen, ship, alien_group, bullet_group)
+
+
+def ship_hit(ai_settings, stats, screen, ship, alien_group, bullet_group):
+    """Processing ships crash"""
+    # Decreasing ship_left
+    if stats.ship_left > 0:
+        stats.ship_left -= 1
+
+        alien_group.empty()
+        bullet_group.empty()
+
+        # Create new fleet and placing ship in the center
+        create_fleet(ai_settings, screen, ship, alien_group)
+        ship.center_ship()
+
+        sleep(0.5)
+    else:
+        stats.game_active = False
 
 
 def create_fleet(ai_settings, screen, ship, alien_group):
@@ -109,7 +143,7 @@ def update_screen(ai_settings, screen, ship, alien_group, bullet_group):
     pygame.display.flip()
 
 
-def update_bullet_group(bullet_group):
+def update_bullet_group(ai_settings, screen, ship, alien_group, bullet_group):
     """Updating bullet position and destroying old bullet"""
     # Updating bullet position
     bullet_group.update()
@@ -118,6 +152,18 @@ def update_bullet_group(bullet_group):
     for bullet in bullet_group.copy():
         if bullet.rect.bottom <= 0:
             bullet_group.remove(bullet)
+
+    check_bullet_alien_collision(ai_settings, screen, ship, alien_group, bullet_group)
+
+
+def check_bullet_alien_collision(ai_settings, screen, ship, alien_group, bullet_group):
+    """Aliens and bullets collision processing"""
+    # If bullet shot the alien delete both bullet and alien
+    collisions = pygame.sprite.groupcollide(bullet_group, alien_group, True, True)
+    if not alien_group:
+        # Destroy existing bullets and create new fleet
+        bullet_group.empty()
+        create_fleet(ai_settings, screen, ship, alien_group)
 
 
 def fire_bullet(ai_settings, screen, ship, bullet_group):

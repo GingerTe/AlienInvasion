@@ -11,9 +11,10 @@ class Settings:
 
         # Ship params
         self.ship_speed_factor = 1.5
+        self.ship_limit = 3
 
         # Bullet params
-        self.bullet_speed_factor = 1
+        self.bullet_speed_factor = 3
         self.bullet_width = 3
         self.bullet_height = 15
         self.bullet_color = 60, 60, 60
@@ -22,6 +23,6 @@ class Settings:
 
         # Alien params
         self.alien_speed_factor = 1
-        self.fleet_drop_speed = 10
+        self.fleet_drop_speed = 100
         # 1 means left direction and -1 means right direction
         self.fleet_direction = 1

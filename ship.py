@@ -23,6 +23,10 @@ class Ship:
         self.moving_right = False
         self.moving_left = False
 
+    def center_ship(self):
+        """Place ship in the center of bottom side"""
+        self.center = self.screen_rect.centerx
+
     def update(self):
         """Updates the ship's position considering flags"""
         if self.moving_right and self.rect.right < self.screen_rect.right:
