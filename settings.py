@@ -9,7 +9,7 @@ class Settings:
         self.bg_color = (230, 230, 230)
         self.screen_caption = "Alien Invasion"
 
-        # Ship settings
+        # Ship params
         self.ship_speed_factor = 1.5
 
         # Bullet params
@@ -19,3 +19,9 @@ class Settings:
         self.bullet_color = 60, 60, 60
         # At any moment on the screen can be a maximum of three bullets
         self.bullet_allowed = 3
+
+        # Alien params
+        self.alien_speed_factor = 1
+        self.fleet_drop_speed = 10
+        # 1 means left direction and -1 means right direction
+        self.fleet_direction = 1

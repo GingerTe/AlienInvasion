@@ -18,18 +18,22 @@ def run_game():
     # Create a ship
     ship = Ship(ai_settings, screen)
 
-    # Creating group for bullets storing
+    # Create a group for bullets
     bullet_group = pygame.sprite.Group()
+    # Create a group for aliens
+    alien_group = pygame.sprite.Group()
 
+    # Create a fleet of aliens
+    game_functions.create_fleet(ai_settings, screen, ship, alien_group)
     # Start main cycle of the game
     while True:
         # Caption keyboard and mouse events
         game_functions.check_events(ai_settings, screen, ship, bullet_group)
         ship.update()
         game_functions.update_bullet_group(bullet_group)
-
+        game_functions.update_alien_group(ai_settings, alien_group)
         # Screen redraws each time through the loop
-        game_functions.update_screen(ai_settings, screen, ship, bullet_group)
+        game_functions.update_screen(ai_settings, screen, ship, alien_group, bullet_group)
 
 
 run_game()
