@@ -23,7 +23,7 @@ class Ship:
         self.moving_right = False
         self.moving_left = False
 
-    def update_position(self):
+    def update(self):
         """Updates the ship's position considering flags"""
         if self.moving_right and self.rect.right < self.screen_rect.right:
             self.center += self.ai_settings.ship_speed_factor
@@ -33,6 +33,6 @@ class Ship:
         # Update rect attribute based in self.center
         self.rect.centerx = self.center
 
-    def blitme(self):
+    def draw_ship(self):
         """"Draws sheep in the current position"""
         self.screen.blit(self.image, self.rect)

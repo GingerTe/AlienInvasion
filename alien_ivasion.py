@@ -18,13 +18,18 @@ def run_game():
     # Create a ship
     ship = Ship(ai_settings, screen)
 
+    # Creating group for bullets storing
+    bullet_group = pygame.sprite.Group()
+
     # Start main cycle of the game
     while True:
         # Caption keyboard and mouse events
-        game_functions.check_events(ship)
-        ship.update_position()
+        game_functions.check_events(ai_settings, screen, ship, bullet_group)
+        ship.update()
+        game_functions.update_bullet_group(bullet_group)
+
         # Screen redraws each time through the loop
-        game_functions.update_screen(ai_settings, screen, ship)
+        game_functions.update_screen(ai_settings, screen, ship, bullet_group)
 
 
 run_game()
