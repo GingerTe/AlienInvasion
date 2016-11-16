@@ -7,7 +7,7 @@ from alien import Alien
 from bullet import Bullet
 
 
-def check_keydown_events(event, ai_settings, screen, stats, ship, alien_group, bullet_group):
+def check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_group, bullet_group):
     """Reacts on keystrokes"""
     if event.key == pygame.K_RIGHT:
         # Move ship right
@@ -17,7 +17,7 @@ def check_keydown_events(event, ai_settings, screen, stats, ship, alien_group, b
         ship.moving_left = True
     elif event.key == pygame.K_SPACE:
         if not stats.game_active:
-            start_game(ai_settings, screen, stats, ship, alien_group, bullet_group)
+            start_game(ai_settings, screen, stats, sb, ship, alien_group, bullet_group)
             ai_settings.initialize_dynamic_settings()
         else:
             fire_bullet(ai_settings, screen, ship, bullet_group)
@@ -33,30 +33,34 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def check_events(ai_settings, screen, stats, play_button, ship, alien_group, bullet_group):
+def check_events(ai_settings, screen, stats, sb, play_button, ship, alien_group, bullet_group):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event, ai_settings, screen, stats, ship, alien_group, bullet_group)
+            check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_group, bullet_group)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            check_play_button(ai_settings, screen, stats, play_button, ship,
+            check_play_button(ai_settings, screen, stats, sb, play_button, ship,
                               alien_group, bullet_group, mouse_x, mouse_y)
 
 
-def check_play_button(ai_settings, screen, stats, play_button, ship, alien_group, bullet_group, mouse_x, mouse_y):
+def check_play_button(ai_settings, screen, stats, sb, play_button, ship, alien_group, bullet_group, mouse_x, mouse_y):
     """Start new game on press Play button"""
     if play_button.rect.collidepoint(mouse_x, mouse_y) and not stats.game_active:
-        start_game(ai_settings, screen, stats, ship, alien_group, bullet_group)
+        start_game(ai_settings, screen, stats, sb, ship, alien_group, bullet_group)
 
 
-def start_game(ai_settings, screen, stats, ship, alien_group, bullet_group):
+def start_game(ai_settings, screen, stats, sb, ship, alien_group, bullet_group):
     stats.reset_stats()
     pygame.mouse.set_visible(False)
     stats.game_active = True
+
+    sb.prep_score()
+    sb.prep_high_score()
+    sb.prep_level()
 
     # Delete aliens and bullets
     alien_group.empty()
@@ -199,10 +203,15 @@ def check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, alien_gro
         for alien_hit in collisions.values():
             stats.score += ai_settings.alien_point * len(alien_hit)
             sb.prep_score()
+            check_high_score(stats, sb)
+
     if not alien_group:
         # Destroy existing bullets and create new fleet
         bullet_group.empty()
         ai_settings.increase_speed()
+        # Increase level
+        stats.level += 1
+        sb.prep_level()
         create_fleet(ai_settings, screen, ship, alien_group)
 
 
@@ -212,3 +221,10 @@ def fire_bullet(ai_settings, screen, ship, bullet_group):
     if len(bullet_group) < ai_settings.bullet_allowed:
         new_bullet = Bullet(ai_settings, screen, ship)
         bullet_group.add(new_bullet)
+
+
+def check_high_score(stats, sb):
+    """Check if new record appears"""
+    if stats.score > stats.high_score:
+        stats.high_score = stats.score
+        sb.prep_high_score()

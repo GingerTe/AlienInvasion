@@ -20,7 +20,7 @@ class Settings:
         self.bullet_allowed = 3
 
         # Alien params
-        self.fleet_drop_speed = 10
+        self.fleet_drop_speed = 10 * 5
 
         # Speed up params
         self.speedup_scale = 1.1
