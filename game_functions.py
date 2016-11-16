@@ -29,7 +29,7 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def check_events(ai_settings, screen, ship, bullet_group):
+def check_events(ai_settings, screen, stats, play_button, ship, bullet_group):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -37,6 +37,15 @@ def check_events(ai_settings, screen, ship, bullet_group):
             check_keydown_events(event, ai_settings, screen, ship, bullet_group)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            check_play_button(stats, play_button, mouse_x, mouse_y)
+
+
+def check_play_button(stats, play_button, mouse_x, mouse_y):
+    """Start new game on press Play button"""
+    if play_button.rect.collidepoint(mouse_x, mouse_y):
+        stats.game_active = True
 
 
 def get_alien_number(ai_settings, alien_width):
@@ -131,7 +140,7 @@ def create_fleet(ai_settings, screen, ship, alien_group):
             create_alien(ai_settings, screen, alien_group, alien_number, row_number)
 
 
-def update_screen(ai_settings, screen, ship, alien_group, bullet_group):
+def update_screen(ai_settings, screen, stats, ship, alien_group, bullet_group, play_button):
     """Update images on the screen and display new screen"""
     screen.fill(ai_settings.bg_color)
     # All bullets displaying beside images of ship and aliens
@@ -139,6 +148,9 @@ def update_screen(ai_settings, screen, ship, alien_group, bullet_group):
         bullet.draw_bullet()
     ship.draw_ship()
     alien_group.draw(screen)
+    if not stats.game_active:
+        play_button.draw_button()
+
     # Show last shown screen
     pygame.display.flip()
 
