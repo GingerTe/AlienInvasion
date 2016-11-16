@@ -44,7 +44,7 @@ def run_game():
         if stats.game_active:
             ship.update()
             game_functions.update_bullet_group(ai_settings, screen, stats, sb, ship, alien_group, bullet_group)
-            game_functions.update_alien_group(ai_settings, stats, screen, ship, alien_group, bullet_group)
+            game_functions.update_alien_group(ai_settings, stats, sb, screen, ship, alien_group, bullet_group)
         # Screen redraws each time through the loop
         game_functions.update_screen(ai_settings, screen, stats, sb, ship, alien_group, bullet_group, play_button)
 

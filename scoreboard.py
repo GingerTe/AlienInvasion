@@ -1,5 +1,7 @@
 import pygame
 
+from ship import Ship
+
 
 class Scoreboard:
     """Class for displaying game info"""
@@ -17,6 +19,7 @@ class Scoreboard:
         self.prep_score()
         self.prep_high_score()
         self.prep_level()
+        self.prep_ships()
 
     def prep_score(self):
         """Convert current score to image"""
@@ -49,8 +52,19 @@ class Scoreboard:
         self.level_rect.right = self.score_rect.right
         self.level_rect.top = self.score_rect.bottom + 10
 
+    def prep_ships(self):
+        self.ships = pygame.sprite.Group()
+
+        for ship_num in range(self.stats.ship_left):
+            ship = Ship(self.ai_settings, self.screen)
+            ship.rect.x = 10 + ship_num * ship.rect.width
+            ship.rect.y = 10
+            self.ships.add(ship)
+
     def show_score(self):
         """Display score on the screen"""
         self.screen.blit(self.score_image, self.score_rect)
         self.screen.blit(self.high_score_image, self.high_score_rect)
         self.screen.blit(self.level_image, self.level_rect)
+        # Display ships left
+        self.ships.draw(self.screen)

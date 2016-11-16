@@ -61,6 +61,7 @@ def start_game(ai_settings, screen, stats, sb, ship, alien_group, bullet_group):
     sb.prep_score()
     sb.prep_high_score()
     sb.prep_level()
+    sb.prep_ships()
 
     # Delete aliens and bullets
     alien_group.empty()
@@ -112,33 +113,35 @@ def change_fleet_direction(ai_settings, alien_group):
     ai_settings.fleet_direction *= -1
 
 
-def check_alien_bottom(ai_settings, stats, screen, ship, alien_group, bullet_group):
+def check_alien_bottom(ai_settings, stats, sb, screen, ship, alien_group, bullet_group):
     """Check if aliens reaches bottom side of the screen"""
     screen_rect = screen.get_rect()
     for alien in alien_group.sprites():
         if alien.rect.bottom >= screen_rect.bottom:
             # Same as ship collision
-            ship_hit(ai_settings, stats, screen, ship, alien_group, bullet_group)
+            ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group)
+            break
 
 
-def update_alien_group(ai_settings, stats, screen, ship, alien_group, bullet_group):
+def update_alien_group(ai_settings, stats, sb, screen, ship, alien_group, bullet_group):
     """Update all alien position in the fleet"""
     check_fleet_edge(ai_settings, alien_group)
     alien_group.update()
 
     # Checking collisions "alien-ship"
     if pygame.sprite.spritecollideany(ship, alien_group):
-        ship_hit(ai_settings, stats, screen, ship, alien_group, bullet_group)
+        ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group)
 
-    check_alien_bottom(ai_settings, stats, screen, ship, alien_group, bullet_group)
+    check_alien_bottom(ai_settings, stats, sb, screen, ship, alien_group, bullet_group)
 
 
-def ship_hit(ai_settings, stats, screen, ship, alien_group, bullet_group):
+def ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group):
     """Processing ships crash"""
     # Decreasing ship_left
     if stats.ship_left > 0:
         stats.ship_left -= 1
 
+        sb.prep_ships()
         alien_group.empty()
         bullet_group.empty()
 
