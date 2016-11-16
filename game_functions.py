@@ -18,6 +18,7 @@ def check_keydown_events(event, ai_settings, screen, stats, ship, alien_group, b
     elif event.key == pygame.K_SPACE:
         if not stats.game_active:
             start_game(ai_settings, screen, stats, ship, alien_group, bullet_group)
+            ai_settings.initialize_dynamic_settings()
         else:
             fire_bullet(ai_settings, screen, ship, bullet_group)
     elif event.key == pygame.K_ESCAPE:
@@ -49,12 +50,12 @@ def check_events(ai_settings, screen, stats, play_button, ship, alien_group, bul
 def check_play_button(ai_settings, screen, stats, play_button, ship, alien_group, bullet_group, mouse_x, mouse_y):
     """Start new game on press Play button"""
     if play_button.rect.collidepoint(mouse_x, mouse_y) and not stats.game_active:
-        pygame.mouse.set_visible(False)
         start_game(ai_settings, screen, stats, ship, alien_group, bullet_group)
 
 
 def start_game(ai_settings, screen, stats, ship, alien_group, bullet_group):
     stats.reset_stats()
+    pygame.mouse.set_visible(False)
     stats.game_active = True
 
     # Delete aliens and bullets
@@ -194,6 +195,7 @@ def check_bullet_alien_collision(ai_settings, screen, ship, alien_group, bullet_
     if not alien_group:
         # Destroy existing bullets and create new fleet
         bullet_group.empty()
+        ai_settings.increase_speed()
         create_fleet(ai_settings, screen, ship, alien_group)
 
 
