@@ -22,7 +22,7 @@ def check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_grou
         else:
             fire_bullet(ai_settings, screen, ship, bullet_group)
     elif event.key == pygame.K_ESCAPE:
-        sys.exit()
+        exit_game(stats)
 
 
 def check_keyup_events(event, ship):
@@ -36,7 +36,7 @@ def check_keyup_events(event, ship):
 def check_events(ai_settings, screen, stats, sb, play_button, ship, alien_group, bullet_group):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            sys.exit()
+            exit_game(stats)
         elif event.type == pygame.KEYDOWN:
             check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_group, bullet_group)
         elif event.type == pygame.KEYUP:
@@ -58,10 +58,7 @@ def start_game(ai_settings, screen, stats, sb, ship, alien_group, bullet_group):
     pygame.mouse.set_visible(False)
     stats.game_active = True
 
-    sb.prep_score()
-    sb.prep_high_score()
-    sb.prep_level()
-    sb.prep_ships()
+    sb.prep_images()
 
     # Delete aliens and bullets
     alien_group.empty()
@@ -210,12 +207,17 @@ def check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, alien_gro
 
     if not alien_group:
         # Destroy existing bullets and create new fleet
-        bullet_group.empty()
-        ai_settings.increase_speed()
-        # Increase level
-        stats.level += 1
-        sb.prep_level()
-        create_fleet(ai_settings, screen, ship, alien_group)
+        start_new_level(ai_settings, stats, sb, screen, ship, alien_group, bullet_group)
+
+
+def start_new_level(ai_settings, stats, sb, screen, ship, alien_group, bullet_group):
+    """Start new level"""
+    bullet_group.empty()
+    ai_settings.increase_speed()
+    # Increase level
+    stats.level += 1
+    sb.prep_level()
+    create_fleet(ai_settings, screen, ship, alien_group)
 
 
 def fire_bullet(ai_settings, screen, ship, bullet_group):
@@ -230,6 +232,12 @@ def check_high_score(stats, sb):
     """Check if new record appears"""
     if stats.score > stats.high_score:
         stats.high_score = stats.score
-        with open("high_score.txt", "w") as f:
-            f.write(str(stats.score))
         sb.prep_high_score()
+
+
+def exit_game(stats):
+    """Exit_game"""
+    with open("high_score.txt", "w") as f:
+        f.write(str(stats.high_score))
+
+    sys.exit()
