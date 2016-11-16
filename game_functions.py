@@ -160,7 +160,7 @@ def create_fleet(ai_settings, screen, ship, alien_group):
             create_alien(ai_settings, screen, alien_group, alien_number, row_number)
 
 
-def update_screen(ai_settings, screen, stats, ship, alien_group, bullet_group, play_button):
+def update_screen(ai_settings, screen, stats, sb, ship, alien_group, bullet_group, play_button):
     """Update images on the screen and display new screen"""
     screen.fill(ai_settings.bg_color)
     # All bullets displaying beside images of ship and aliens
@@ -168,6 +168,9 @@ def update_screen(ai_settings, screen, stats, ship, alien_group, bullet_group, p
         bullet.draw_bullet()
     ship.draw_ship()
     alien_group.draw(screen)
+
+    # Display score
+    sb.show_score()
     if not stats.game_active:
         play_button.draw_button()
 
@@ -175,7 +178,7 @@ def update_screen(ai_settings, screen, stats, ship, alien_group, bullet_group, p
     pygame.display.flip()
 
 
-def update_bullet_group(ai_settings, screen, ship, alien_group, bullet_group):
+def update_bullet_group(ai_settings, screen, stats, sb, ship, alien_group, bullet_group):
     """Updating bullet position and destroying old bullet"""
     # Updating bullet position
     bullet_group.update()
@@ -185,13 +188,17 @@ def update_bullet_group(ai_settings, screen, ship, alien_group, bullet_group):
         if bullet.rect.bottom <= 0:
             bullet_group.remove(bullet)
 
-    check_bullet_alien_collision(ai_settings, screen, ship, alien_group, bullet_group)
+    check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, alien_group, bullet_group)
 
 
-def check_bullet_alien_collision(ai_settings, screen, ship, alien_group, bullet_group):
+def check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, alien_group, bullet_group):
     """Aliens and bullets collision processing"""
     # If bullet shot the alien delete both bullet and alien
     collisions = pygame.sprite.groupcollide(bullet_group, alien_group, True, True)
+    if collisions:
+        for alien_hit in collisions.values():
+            stats.score += ai_settings.alien_point * len(alien_hit)
+            sb.prep_score()
     if not alien_group:
         # Destroy existing bullets and create new fleet
         bullet_group.empty()
