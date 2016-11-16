@@ -36,7 +36,7 @@ def run_game():
     # Start main cycle of the game
     while True:
         # Caption keyboard and mouse events
-        game_functions.check_events(ai_settings, screen, stats, play_button, ship, bullet_group)
+        game_functions.check_events(ai_settings, screen, stats, play_button, ship, alien_group, bullet_group)
         if stats.game_active:
             ship.update()
             game_functions.update_bullet_group(ai_settings, screen, ship, alien_group, bullet_group)
