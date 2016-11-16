@@ -46,6 +46,7 @@ def check_events(ai_settings, screen, stats, play_button, ship, alien_group, bul
 def check_play_button(ai_settings, screen, stats, play_button, ship, alien_group, bullet_group, mouse_x, mouse_y):
     """Start new game on press Play button"""
     if play_button.rect.collidepoint(mouse_x, mouse_y) and not stats.game_active:
+        pygame.mouse.set_visible(False)
         stats.reset_stats()
         stats.game_active = True
 
@@ -136,6 +137,7 @@ def ship_hit(ai_settings, stats, screen, ship, alien_group, bullet_group):
         sleep(0.5)
     else:
         stats.game_active = False
+        pygame.mouse.set_visible(True)
 
 
 def create_fleet(ai_settings, screen, ship, alien_group):
