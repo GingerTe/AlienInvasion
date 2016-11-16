@@ -1,3 +1,4 @@
+import os
 class GameStats:
     """Statistic tracking"""
 
@@ -5,8 +6,12 @@ class GameStats:
         """Initialize statistics"""
         self.ai_settings = ai_settings
 
-        # Saving hign score during session
         self.high_score = 0
+        if os.path.isfile("high_score.txt"):
+            with open("high_score.txt") as f:
+                score = f.read().strip()
+                if score:
+                    self.high_score = int(score)
 
         self.reset_stats()
         self.game_active = False
