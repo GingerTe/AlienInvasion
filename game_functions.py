@@ -7,7 +7,7 @@ from alien import Alien
 from bullet import Bullet
 
 
-def check_keydown_events(event, ai_settings, screen, ship, bullet_group):
+def check_keydown_events(event, ai_settings, screen, stats, ship, alien_group, bullet_group):
     """Reacts on keystrokes"""
     if event.key == pygame.K_RIGHT:
         # Move ship right
@@ -16,7 +16,10 @@ def check_keydown_events(event, ai_settings, screen, ship, bullet_group):
         # Move ship left
         ship.moving_left = True
     elif event.key == pygame.K_SPACE:
-        fire_bullet(ai_settings, screen, ship, bullet_group)
+        if not stats.game_active:
+            start_game(ai_settings, screen, stats, ship, alien_group, bullet_group)
+        else:
+            fire_bullet(ai_settings, screen, ship, bullet_group)
     elif event.key == pygame.K_ESCAPE:
         sys.exit()
 
@@ -34,7 +37,7 @@ def check_events(ai_settings, screen, stats, play_button, ship, alien_group, bul
         if event.type == pygame.QUIT:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event, ai_settings, screen, ship, bullet_group)
+            check_keydown_events(event, ai_settings, screen, stats, ship, alien_group, bullet_group)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -47,16 +50,20 @@ def check_play_button(ai_settings, screen, stats, play_button, ship, alien_group
     """Start new game on press Play button"""
     if play_button.rect.collidepoint(mouse_x, mouse_y) and not stats.game_active:
         pygame.mouse.set_visible(False)
-        stats.reset_stats()
-        stats.game_active = True
+        start_game(ai_settings, screen, stats, ship, alien_group, bullet_group)
 
-        # Delete aliens and bullets
-        alien_group.empty()
-        bullet_group.empty()
 
-        # Create new fleet and place ship in the center of bottom side
-        create_fleet(ai_settings, screen, ship, alien_group)
-        ship.center_ship()
+def start_game(ai_settings, screen, stats, ship, alien_group, bullet_group):
+    stats.reset_stats()
+    stats.game_active = True
+
+    # Delete aliens and bullets
+    alien_group.empty()
+    bullet_group.empty()
+
+    # Create new fleet and place ship in the center of bottom side
+    create_fleet(ai_settings, screen, ship, alien_group)
+    ship.center_ship()
 
 
 def get_alien_number(ai_settings, alien_width):
