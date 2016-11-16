@@ -18,7 +18,8 @@ class Scoreboard:
 
     def prep_score(self):
         """Convert current score to image"""
-        score_str = str(self.stats.score)
+        rounded_score = round(self.stats.score, -1)
+        score_str = "{:,}".format(rounded_score)
         self.score_image = self.font.render(score_str, True, self.text_color, self.ai_settings.bg_color)
 
         # Display score in top right edge of the screen
