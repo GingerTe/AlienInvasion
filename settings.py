@@ -10,17 +10,17 @@ class Settings:
         self.screen_caption = "Alien Invasion"
 
         # Ship params
-        self.ship_limit = 0
+        self.ship_limit = 3
 
         # Bullet params
-        self.bullet_width = 300
+        self.bullet_width = 3
         self.bullet_height = 15
         self.bullet_color = 60, 60, 60
         # At any moment on the screen can be a maximum of three bullets
         self.bullet_allowed = 3
 
         # Alien params
-        self.fleet_drop_speed = 100
+        self.fleet_drop_speed = 10
 
         # Speed up params
         self.speedup_scale = 1.1
