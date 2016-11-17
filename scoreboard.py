@@ -39,7 +39,7 @@ class Scoreboard:
     def prep_high_score(self):
         """Convert current score to image"""
         rounded_score = round(self.stats.high_score, -1)
-        score_str = "{:,}".format(rounded_score)
+        score_str = "{:,} {}".format(rounded_score, self.stats.champion_name)
         self.high_score_image = self.font.render(score_str, True, self.text_color, self.ai_settings.bg_color)
 
         # Display score in top right edge of the screen

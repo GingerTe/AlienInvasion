@@ -1,3 +1,5 @@
+import json
+import os
 import sys
 from time import sleep
 
@@ -7,9 +9,24 @@ from alien import Alien
 from bullet import Bullet
 
 
-def check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_group, bullet_group):
+def check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_group, bullet_group, q):
     """Reacts on keystrokes"""
-    if event.key == pygame.K_RIGHT:
+    if event.key == pygame.K_ESCAPE:
+        exit_game(stats)
+    elif stats.ask_name:
+        if event.key == pygame.K_BACKSPACE:
+            q.input = q.input[0:-1]
+        elif event.key == pygame.K_RETURN:
+            q.answer = "".join(q.input)
+            dump_high_score(stats, q.answer)
+            stats.ask_name = False
+        elif event.key in (pygame.K_MINUS, pygame.K_SPACE) and len(q.input) != q.max_answer_len:
+            q.input.append("_")
+        elif event.key <= 127 and len(q.input) != q.max_answer_len:
+            q.input.append(chr(event.key).upper())
+        print(q.input)
+        pygame.display.flip()
+    elif event.key == pygame.K_RIGHT:
         # Move ship right
         ship.moving_right = True
     elif event.key == pygame.K_LEFT:
@@ -21,8 +38,6 @@ def check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_grou
             ai_settings.initialize_dynamic_settings()
         else:
             fire_bullet(ai_settings, screen, ship, bullet_group)
-    elif event.key == pygame.K_ESCAPE:
-        exit_game(stats)
 
 
 def check_keyup_events(event, ship):
@@ -33,12 +48,12 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def check_events(ai_settings, screen, stats, sb, play_button, ship, alien_group, bullet_group):
+def check_events(ai_settings, screen, stats, sb, play_button, ship, alien_group, bullet_group, q):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit_game(stats)
         elif event.type == pygame.KEYDOWN:
-            check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_group, bullet_group)
+            check_keydown_events(event, ai_settings, screen, stats, sb, ship, alien_group, bullet_group, q)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, ship)
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -110,29 +125,29 @@ def change_fleet_direction(ai_settings, alien_group):
     ai_settings.fleet_direction *= -1
 
 
-def check_alien_bottom(ai_settings, stats, sb, screen, ship, alien_group, bullet_group):
+def check_alien_bottom(ai_settings, stats, sb, screen, ship, alien_group, bullet_group, q):
     """Check if aliens reaches bottom side of the screen"""
     screen_rect = screen.get_rect()
     for alien in alien_group.sprites():
         if alien.rect.bottom >= screen_rect.bottom:
             # Same as ship collision
-            ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group)
+            ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group, q)
             break
 
 
-def update_alien_group(ai_settings, stats, sb, screen, ship, alien_group, bullet_group):
+def update_alien_group(ai_settings, stats, sb, screen, ship, alien_group, bullet_group, q):
     """Update all alien position in the fleet"""
     check_fleet_edge(ai_settings, alien_group)
     alien_group.update()
 
     # Checking collisions "alien-ship"
     if pygame.sprite.spritecollideany(ship, alien_group):
-        ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group)
+        ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group, q)
 
-    check_alien_bottom(ai_settings, stats, sb, screen, ship, alien_group, bullet_group)
+    check_alien_bottom(ai_settings, stats, sb, screen, ship, alien_group, bullet_group, q)
 
 
-def ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group):
+def ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group, q):
     """Processing ships crash"""
     # Decreasing ship_left
     if stats.ship_left > 0:
@@ -149,6 +164,7 @@ def ship_hit(ai_settings, stats, sb, screen, ship, alien_group, bullet_group):
         sleep(0.5)
     else:
         stats.game_active = False
+        check_high_score(stats, sb)
         pygame.mouse.set_visible(True)
 
 
@@ -164,7 +180,7 @@ def create_fleet(ai_settings, screen, ship, alien_group):
             create_alien(ai_settings, screen, alien_group, alien_number, row_number)
 
 
-def update_screen(ai_settings, screen, stats, sb, ship, alien_group, bullet_group, play_button):
+def update_screen(ai_settings, screen, stats, sb, ship, alien_group, bullet_group, play_button, q):
     """Update images on the screen and display new screen"""
     screen.fill(ai_settings.bg_color)
     # All bullets displaying beside images of ship and aliens
@@ -175,8 +191,10 @@ def update_screen(ai_settings, screen, stats, sb, ship, alien_group, bullet_grou
 
     # Display score
     sb.show_score()
-    if not stats.game_active:
+    if not stats.game_active and not stats.ask_name:
         play_button.draw_button()
+    elif stats.ask_name:
+        q.draw_question()
 
     # Show last shown screen
     pygame.display.flip()
@@ -203,7 +221,6 @@ def check_bullet_alien_collision(ai_settings, screen, stats, sb, ship, alien_gro
         for alien_hit in collisions.values():
             stats.score += ai_settings.alien_point * len(alien_hit)
             sb.prep_score()
-            check_high_score(stats, sb)
 
     if not alien_group:
         # Destroy existing bullets and create new fleet
@@ -233,11 +250,20 @@ def check_high_score(stats, sb):
     if stats.score > stats.high_score:
         stats.high_score = stats.score
         sb.prep_high_score()
+        stats.ask_name = True
+
+
+def dump_high_score(stats, name):
+    if os.path.isfile(stats.score_path):
+        with open(stats.score_path) as f:
+            score = json.load(f)
+    else:
+        score = []
+    score.insert(0, (stats.high_score, name))
+    with open(stats.score_path, "w") as f:
+        json.dump(score, f)
 
 
 def exit_game(stats):
     """Exit_game"""
-    with open("high_score.txt", "w") as f:
-        f.write(str(stats.high_score))
-
     sys.exit()
